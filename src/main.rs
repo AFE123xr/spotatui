@@ -66,19 +66,19 @@ use rspotify::{
   prelude::*,
   {AuthCodePkceSpotify, Config, Credentials, OAuth, Token},
 };
+#[cfg(feature = "streaming")]
+use std::time::{Duration, Instant};
 use std::{
   cmp::{max, min},
   fs,
   io::{self, stdout, Write},
   panic,
   path::{Path, PathBuf},
-  sync::{atomic::AtomicU64, Arc},
+  sync::{
+    atomic::{AtomicU64, Ordering},
+    Arc,
+  },
   time::SystemTime,
-};
-#[cfg(feature = "streaming")]
-use std::{
-  sync::atomic::Ordering,
-  time::{Duration, Instant},
 };
 use tokio::sync::Mutex;
 
