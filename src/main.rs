@@ -56,9 +56,12 @@ use clap::{Arg, Command as ClapApp};
 use clap_complete::{generate, Shell};
 use crossterm::{
   cursor::MoveTo,
-  event::{DisableMouseCapture, EnableMouseCapture},
+  event::{
+    DisableMouseCapture, EnableMouseCapture, KeyboardEnhancementFlags, PopKeyboardEnhancementFlags,
+    PushKeyboardEnhancementFlags,
+  },
   execute,
-  terminal::SetTitle,
+  terminal::{supports_keyboard_enhancement, SetTitle},
   ExecutableCommand,
 };
 use log::info;
@@ -1995,6 +1998,26 @@ async fn start_ui(
   // Terminal initialization
   let mut terminal = ratatui::init();
   execute!(stdout(), EnableMouseCapture)?;
+  let keyboard_enhancement_supported = supports_keyboard_enhancement().unwrap_or(false);
+  let keyboard_enhancement_enabled = keyboard_enhancement_supported
+    && execute!(
+      stdout(),
+      PushKeyboardEnhancementFlags(
+        KeyboardEnhancementFlags::DISAMBIGUATE_ESCAPE_CODES
+          | KeyboardEnhancementFlags::REPORT_ALTERNATE_KEYS
+          | KeyboardEnhancementFlags::REPORT_ALL_KEYS_AS_ESCAPE_CODES
+      )
+    )
+    .is_ok();
+  if keyboard_enhancement_enabled {
+    info!("enabled keyboard enhancement flags");
+  }
+  {
+    let mut app = app.lock().await;
+    app.terminal_input_caps.keyboard_enhancement_supported = keyboard_enhancement_supported;
+    app.terminal_input_caps.keyboard_enhancement_enabled = keyboard_enhancement_enabled;
+    app.terminal_input_caps.ctrl_punct_reliable = app::CapabilityState::Unknown;
+  }
 
   if user_config.behavior.set_window_title {
     execute!(stdout(), SetTitle("spt - spotatui"))?;
@@ -2282,7 +2305,7 @@ async fn start_ui(
         app.dispatch(IoEvent::FetchGlobalSongCount);
       }
       app.dispatch(IoEvent::FetchAnnouncements);
-      app.help_docs_size = ui::help::get_help_docs(&app.user_config.keys).len() as u32;
+      app.help_docs_size = ui::help::get_help_docs(&app).len() as u32;
 
       is_first_render = false;
     }
@@ -2307,6 +2330,9 @@ async fn start_ui(
   }
 
   execute!(stdout(), DisableMouseCapture)?;
+  if keyboard_enhancement_enabled {
+    let _ = execute!(stdout(), PopKeyboardEnhancementFlags);
+  }
   ratatui::restore();
 
   #[cfg(feature = "discord-rpc")]
@@ -2336,6 +2362,26 @@ async fn start_ui(
   // Terminal initialization
   let mut terminal = ratatui::init();
   execute!(stdout(), EnableMouseCapture)?;
+  let keyboard_enhancement_supported = supports_keyboard_enhancement().unwrap_or(false);
+  let keyboard_enhancement_enabled = keyboard_enhancement_supported
+    && execute!(
+      stdout(),
+      PushKeyboardEnhancementFlags(
+        KeyboardEnhancementFlags::DISAMBIGUATE_ESCAPE_CODES
+          | KeyboardEnhancementFlags::REPORT_ALTERNATE_KEYS
+          | KeyboardEnhancementFlags::REPORT_ALL_KEYS_AS_ESCAPE_CODES
+      )
+    )
+    .is_ok();
+  if keyboard_enhancement_enabled {
+    info!("enabled keyboard enhancement flags");
+  }
+  {
+    let mut app = app.lock().await;
+    app.terminal_input_caps.keyboard_enhancement_supported = keyboard_enhancement_supported;
+    app.terminal_input_caps.keyboard_enhancement_enabled = keyboard_enhancement_enabled;
+    app.terminal_input_caps.ctrl_punct_reliable = app::CapabilityState::Unknown;
+  }
 
   if user_config.behavior.set_window_title {
     execute!(stdout(), SetTitle("spt - spotatui"))?;
@@ -2582,12 +2628,15 @@ async fn start_ui(
         app.dispatch(IoEvent::FetchGlobalSongCount);
       }
       app.dispatch(IoEvent::FetchAnnouncements);
-      app.help_docs_size = ui::help::get_help_docs(&app.user_config.keys).len() as u32;
+      app.help_docs_size = ui::help::get_help_docs(&app).len() as u32;
       is_first_render = false;
     }
   }
 
   execute!(stdout(), DisableMouseCapture)?;
+  if keyboard_enhancement_enabled {
+    let _ = execute!(stdout(), PopKeyboardEnhancementFlags);
+  }
   ratatui::restore();
 
   #[cfg(feature = "discord-rpc")]

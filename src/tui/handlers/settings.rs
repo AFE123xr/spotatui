@@ -29,7 +29,7 @@ fn handle_navigation(key: Key, app: &mut App) {
     Key::Enter => enter_edit_mode(app),
 
     // Save settings
-    key if key == app.user_config.keys.save_settings => {
+    key if key == app.effective_save_settings_key() => {
       let _ = save_settings(app);
     }
 
@@ -451,6 +451,11 @@ fn handle_preset_edit(key: Key, app: &mut App) {
 fn save_settings(app: &mut App) -> bool {
   // Apply settings to user_config and save to file
   app.apply_settings_changes();
+  #[cfg(target_os = "macos")]
+  if app.user_config.keys.open_settings != Key::Ctrl(',') {
+    app.keybinding_runtime.effective_open_settings = None;
+    app.keybinding_runtime.fallback_reason = None;
+  }
   if let Err(e) = app.user_config.save_config() {
     app.handle_error(anyhow::anyhow!("Failed to save settings: {}", e));
     return false;

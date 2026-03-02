@@ -6,6 +6,7 @@
 
 - **PortAudio Device-Switch Recovery (macOS/AirPods)**: Added recovery for recoverable PortAudio backend panics when the output device changes (for example, AirPods connect/switch events), reducing playback interruptions and preventing app crashes.
 - **Mac Tahoe 26.2 Build Failure (macOS Media Activation Policy)**: Fixed a macOS Tahoe 26.2 build break by correcting Objective-C FFI types for `NSApplication setActivationPolicy:` (`BOOL` return and `NSInteger` argument).
+- **Settings Shortcut Reliability on macOS Terminals**: Added terminal keyboard-capability detection and runtime fallback handling for `Ctrl+,` when terminal/tmux stacks drop punctuation modifiers; spotatui now applies a session fallback to `Alt+,`, prompts before persisting to `config.yml`, and displays effective shortcuts in Help/Settings UI.
 
 ## [0.37.0] - 2026-02-27
 

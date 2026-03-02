@@ -1,6 +1,7 @@
-use crate::core::user_config::KeyBindings;
+use crate::core::app::App;
 
-pub fn get_help_docs(key_bindings: &KeyBindings) -> Vec<Vec<String>> {
+pub fn get_help_docs(app: &App) -> Vec<Vec<String>> {
+  let key_bindings = &app.user_config.keys;
   vec![
     vec![
       String::from("Scroll down to next result page"),
@@ -159,12 +160,12 @@ pub fn get_help_docs(key_bindings: &KeyBindings) -> Vec<Vec<String>> {
     ],
     vec![
       String::from("Open settings"),
-      key_bindings.open_settings.to_string(),
+      app.effective_open_settings_key().to_string(),
       String::from("General"),
     ],
     vec![
       String::from("Save settings"),
-      key_bindings.save_settings.to_string(),
+      app.effective_save_settings_key().to_string(),
       String::from("Settings"),
     ],
     vec![

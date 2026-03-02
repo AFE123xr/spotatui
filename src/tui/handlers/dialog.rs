@@ -13,7 +13,8 @@ pub fn handler(key: Key, app: &mut App) {
     DialogContext::AddTrackToPlaylistPicker => handle_add_to_playlist_picker(key, app),
     DialogContext::PlaylistWindow
     | DialogContext::PlaylistSearch
-    | DialogContext::RemoveTrackFromPlaylistConfirm => {
+    | DialogContext::RemoveTrackFromPlaylistConfirm
+    | DialogContext::PersistKeybindingFallback => {
       handle_confirmation_dialog(key, app, dialog_context)
     }
   }
@@ -29,12 +30,20 @@ fn handle_confirmation_dialog(key: Key, app: &mut App, dialog_context: DialogCon
           DialogContext::RemoveTrackFromPlaylistConfirm => {
             handle_remove_track_from_playlist_confirm(app);
           }
+          DialogContext::PersistKeybindingFallback => {
+            app.persist_open_settings_fallback();
+          }
           DialogContext::AddTrackToPlaylistPicker => {}
         }
+      } else if dialog_context == DialogContext::PersistKeybindingFallback {
+        app.set_status_message("Using Alt+, for this session only", 4);
       }
       close_dialog(app);
     }
     Key::Char('q') => {
+      if dialog_context == DialogContext::PersistKeybindingFallback {
+        app.set_status_message("Using Alt+, for this session only", 4);
+      }
       close_dialog(app);
     }
     k if common_key_events::right_event(k) => app.confirm = !app.confirm,
@@ -123,9 +132,7 @@ fn handle_remove_track_from_playlist_confirm(app: &mut App) {
 
 fn close_dialog(app: &mut App) {
   app.pop_navigation_stack();
-  app.dialog = None;
-  app.confirm = false;
-  app.clear_playlist_track_dialog_state();
+  app.clear_dialog_state();
 }
 
 #[cfg(test)]
