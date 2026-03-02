@@ -230,9 +230,7 @@ fn open_remove_from_playlist_dialog(app: &mut App) {
     }
   };
 
-  app.dialog = None;
-  app.confirm = false;
-  app.clear_playlist_track_dialog_state();
+  app.clear_dialog_state();
   app.pending_playlist_track_removal = Some(PendingPlaylistTrackRemoval {
     playlist_id: playlist_context.0,
     playlist_name: playlist_context.1,

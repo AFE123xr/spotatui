@@ -36,11 +36,51 @@ use rspotify::model::{context::CurrentPlaybackContext, PlayableItem};
 pub use input::handler as input_handler;
 pub use mouse::handler as mouse_handler;
 
+#[cfg(target_os = "macos")]
+fn key_matches_open_settings_binding(key: Key, binding: Key) -> bool {
+  key == binding
+    || (binding == Key::Alt(',') && key == Key::Char('≤'))
+    || (binding == Key::Ctrl(',')
+      && (key == Key::Ctrl('l')
+        || key == Key::Ctrl('L')
+        || key == Key::Ctrl('4')
+        || key == Key::Ctrl('<')))
+}
+
+#[cfg(not(target_os = "macos"))]
+fn key_matches_open_settings_binding(key: Key, binding: Key) -> bool {
+  key == binding
+}
+
+fn open_settings(app: &mut App) {
+  app.load_settings_for_category();
+  app.push_navigation_stack(RouteId::Settings, ActiveBlock::Settings);
+}
+
 pub fn handle_app(key: Key, app: &mut App) {
   if app.get_current_route().active_block == ActiveBlock::Settings
     && app.settings_unsaved_prompt_visible
   {
     settings::handler(key, app);
+    return;
+  }
+
+  if app.maybe_activate_open_settings_fallback(key) {
+    open_settings(app);
+    if app.pending_keybinding_persist.is_some() {
+      app.push_navigation_stack(
+        RouteId::Dialog,
+        ActiveBlock::Dialog(crate::core::app::DialogContext::PersistKeybindingFallback),
+      );
+    }
+    return;
+  }
+
+  let effective_open_settings = app.effective_open_settings_key();
+  if key_matches_open_settings_binding(key, app.user_config.keys.open_settings)
+    || key_matches_open_settings_binding(key, effective_open_settings)
+  {
+    open_settings(app);
     return;
   }
 
@@ -111,10 +151,6 @@ pub fn handle_app(key: Key, app: &mut App) {
     }
     _ if key == app.user_config.keys.basic_view => {
       app.push_navigation_stack(RouteId::BasicView, ActiveBlock::BasicView);
-    }
-    _ if key == app.user_config.keys.open_settings => {
-      app.load_settings_for_category();
-      app.push_navigation_stack(RouteId::Settings, ActiveBlock::Settings);
     }
     Key::Char('W') => match app.get_current_route().active_block {
       ActiveBlock::Input
@@ -229,11 +265,12 @@ fn handle_escape(app: &mut App) {
     ActiveBlock::Error => {
       app.pop_navigation_stack();
     }
-    ActiveBlock::Dialog(_) => {
+    ActiveBlock::Dialog(dialog_context) => {
+      if dialog_context == crate::core::app::DialogContext::PersistKeybindingFallback {
+        app.set_status_message("Using Alt+, for this session only", 4);
+      }
       app.pop_navigation_stack();
-      app.dialog = None;
-      app.confirm = false;
-      app.clear_playlist_track_dialog_state();
+      app.clear_dialog_state();
     }
     ActiveBlock::HelpMenu => {
       app.pop_navigation_stack();
@@ -314,6 +351,7 @@ fn handle_jump_to_artist_album(app: &mut App) {
 #[cfg(test)]
 mod tests {
   use super::*;
+  use crate::core::app::TrackTableContext;
 
   #[test]
   fn global_shift_w_adds_current_track_from_anywhere() {
@@ -337,5 +375,38 @@ mod tests {
 
     assert_eq!(app.input, vec!['W']);
     assert!(app.status_message.is_none());
+  }
+
+  #[cfg(target_os = "macos")]
+  #[test]
+  fn plain_comma_fallback_opens_settings_and_prompts_to_persist() {
+    let mut app = App::default();
+    app.user_config.keys.open_settings = Key::Ctrl(',');
+    app.set_current_route_state(Some(ActiveBlock::Empty), Some(ActiveBlock::Library));
+
+    handle_app(Key::Char(','), &mut app);
+
+    assert_eq!(
+      app.keybinding_runtime.effective_open_settings,
+      Some(Key::Alt(','))
+    );
+    assert_eq!(
+      app.get_current_route().active_block,
+      ActiveBlock::Dialog(crate::core::app::DialogContext::PersistKeybindingFallback)
+    );
+    assert!(app.status_message.is_some());
+  }
+
+  #[cfg(target_os = "macos")]
+  #[test]
+  fn plain_comma_does_not_override_track_table_sort_menu() {
+    let mut app = App::default();
+    app.user_config.keys.open_settings = Key::Ctrl(',');
+    app.track_table.context = Some(TrackTableContext::MyPlaylists);
+    app.push_navigation_stack(RouteId::TrackTable, ActiveBlock::TrackTable);
+
+    handle_app(Key::Char(','), &mut app);
+
+    assert_eq!(app.get_current_route().active_block, ActiveBlock::SortMenu);
   }
 }

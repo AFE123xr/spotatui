@@ -15,7 +15,7 @@ pub fn draw_settings(f: &mut Frame<'_>, app: &App) {
     &Layout::vertical([
       Constraint::Length(3), // Category tabs
       Constraint::Min(1),    // Settings list
-      Constraint::Length(3), // Help bar
+      Constraint::Length(4), // Help bar + terminal capability line
     ])
     .margin(2),
   );
@@ -88,7 +88,19 @@ fn draw_settings_list(f: &mut Frame<'_>, app: &App, area: Rect) {
           }
           SettingValue::Number(v) => v.to_string(),
           SettingValue::String(v) => format!("\"{}\"", v),
-          SettingValue::Key(v) => format!("[{}]", v),
+          SettingValue::Key(v) => {
+            if setting.id == "keys.open_settings" {
+              let effective = app.effective_open_settings_key();
+              let configured = app.user_config.keys.open_settings;
+              if effective != configured {
+                format!("[{}] (effective: {})", v, effective)
+              } else {
+                format!("[{}]", v)
+              }
+            } else {
+              format!("[{}]", v)
+            }
+          }
           SettingValue::Color(v) => format!("■ {}", v),
           SettingValue::Preset(v) => format!("◆ {} ◆", v), // Show preset name with arrows hint
         }
@@ -152,8 +164,26 @@ fn draw_settings_list(f: &mut Frame<'_>, app: &App, area: Rect) {
   f.render_widget(list, area);
 }
 
+fn format_terminal_input_caps(app: &App) -> String {
+  let enhancement = if app.terminal_input_caps.keyboard_enhancement_enabled {
+    "enh:on"
+  } else if app.terminal_input_caps.keyboard_enhancement_supported {
+    "enh:available"
+  } else {
+    "enh:off"
+  };
+
+  let ctrl_comma = match app.terminal_input_caps.ctrl_punct_reliable {
+    crate::core::app::CapabilityState::Yes => "ctrl+,=ok",
+    crate::core::app::CapabilityState::No => "ctrl+,=degraded",
+    crate::core::app::CapabilityState::Unknown => "ctrl+,=unknown",
+  };
+
+  format!("Terminal Input: {} | {}", enhancement, ctrl_comma)
+}
+
 fn draw_settings_help(f: &mut Frame<'_>, app: &App, area: Rect) {
-  let help_text = if app.settings_edit_mode {
+  let controls_line = if app.settings_edit_mode {
     match app.settings_items.get(app.settings_selected_index) {
       Some(setting) => match &setting.value {
         SettingValue::Bool(_) => "Space/Enter: Toggle | ←/→: Toggle | Esc: Cancel",
@@ -168,9 +198,10 @@ fn draw_settings_help(f: &mut Frame<'_>, app: &App, area: Rect) {
   } else {
     &format!(
       "↑/↓: Select | ←/→: Switch Tab | Enter: Toggle/Edit | Mouse: Click/Scroll | {}: Save | Esc/q: Exit",
-      app.user_config.keys.save_settings
+      app.effective_save_settings_key()
     )
   };
+  let help_text = format!("{}\n{}", controls_line, format_terminal_input_caps(app));
 
   let help = Paragraph::new(help_text)
     .style(

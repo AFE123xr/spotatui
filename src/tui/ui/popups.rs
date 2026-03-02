@@ -23,7 +23,7 @@ pub fn draw_help_menu(f: &mut Frame<'_>, app: &App) {
   let header = ["Description", "Event", "Context"];
   let header = format_row(header.iter().map(|s| s.to_string()).collect());
 
-  let help_docs = get_help_docs(&app.user_config.keys);
+  let help_docs = get_help_docs(app);
   let help_docs = help_docs
     .into_iter()
     .map(format_row)
@@ -143,6 +143,19 @@ pub fn draw_dialog(f: &mut Frame<'_>, app: &App) {
           )),
         ];
         draw_confirmation_dialog(f, app, "Remove Track", text, 60);
+      }
+    }
+    DialogContext::PersistKeybindingFallback => {
+      if let Some(persist) = app.pending_keybinding_persist.as_ref() {
+        let text = vec![
+          Line::from(Span::raw("Ctrl+, is not reported by this terminal stack.")),
+          Line::from(Span::raw("Use fallback shortcut for Open Settings?")),
+          Line::from(Span::styled(
+            format!("Save as: {}", persist.open_settings_key),
+            Style::default().add_modifier(Modifier::BOLD),
+          )),
+        ];
+        draw_confirmation_dialog(f, app, "Save Shortcut Fallback", text, 66);
       }
     }
     DialogContext::AddTrackToPlaylistPicker => {
