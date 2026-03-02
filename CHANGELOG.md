@@ -5,6 +5,7 @@
 ### Fixed
 
 - **PortAudio Device-Switch Recovery (macOS/AirPods)**: Added recovery for recoverable PortAudio backend panics when the output device changes (for example, AirPods connect/switch events), reducing playback interruptions and preventing app crashes.
+- **Mac Tahoe 26.2 Build Failure (macOS Media Activation Policy)**: Fixed a macOS Tahoe 26.2 build break by correcting Objective-C FFI types for `NSApplication setActivationPolicy:` (`BOOL` return and `NSInteger` argument).
 
 ## [0.37.0] - 2026-02-27
 

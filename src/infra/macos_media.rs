@@ -79,7 +79,7 @@ impl MacMediaManager {
         let cls = AnyClass::get(c"NSApplication").expect("NSApplication class not found");
         let app: objc2::rc::Retained<AnyObject> = msg_send![cls, sharedApplication];
         // NSApplicationActivationPolicyProhibited = 2 (no Dock icon, no menu bar)
-        let _: () = msg_send![&app, setActivationPolicy: 2i64];
+        let _activation_policy_set: bool = msg_send![&app, setActivationPolicy: 2isize];
       }
       info!("macos media: NSApplication initialized with Prohibited activation policy");
 
