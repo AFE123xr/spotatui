@@ -69,7 +69,7 @@ impl RecoveringSink {
     }
 
     let make_sink = &self.make_sink;
-    match catch_unwind(AssertUnwindSafe(|| make_sink())) {
+    match catch_unwind(AssertUnwindSafe(make_sink)) {
       Ok(sink) => {
         self.inner = Some(sink);
         Ok(())
