@@ -154,7 +154,10 @@ mod tests {
     let mut app = App::default();
     app.user_config.behavior.playbar_height_rows = MAX_PLAYBAR_ROWS;
     increase_playbar_height(&mut app);
-    assert_eq!(app.user_config.behavior.playbar_height_rows, MAX_PLAYBAR_ROWS);
+    assert_eq!(
+      app.user_config.behavior.playbar_height_rows,
+      MAX_PLAYBAR_ROWS
+    );
   }
 
   #[test]

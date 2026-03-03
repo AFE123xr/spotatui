@@ -665,24 +665,19 @@ fn main_layout_areas(app: &App) -> Option<MainLayoutAreas> {
 
   let routes_area = if wide_layout {
     let [routes_area, _playbar_area] =
-      root.layout(&Layout::vertical([Constraint::Min(1), playbar.clone()]).margin(margin));
+      root.layout(&Layout::vertical([Constraint::Min(1), playbar]).margin(margin));
     routes_area
   } else {
     let [input_area, routes_area, _playbar_area] = root.layout(
-      &Layout::vertical([
-        Constraint::Length(3),
-        Constraint::Min(1),
-        playbar.clone(),
-      ])
-      .margin(margin),
+      &Layout::vertical([Constraint::Length(3), Constraint::Min(1), playbar]).margin(margin),
     );
     let [input_text_area, help_area, settings_area] =
       split_input_help_and_settings(app, input_area);
 
-    let [library_area, playlist_area] = user_area_for_routes(routes_area)
-      .layout(&Layout::vertical([library[0].clone(), library[1].clone()]));
+    let [library_area, playlist_area] =
+      user_area_for_routes(routes_area).layout(&Layout::vertical([library[0], library[1]]));
     let [_user_area, content_area] =
-      routes_area.layout(&Layout::horizontal([sidebar[0].clone(), sidebar[1].clone()]));
+      routes_area.layout(&Layout::horizontal([sidebar[0], sidebar[1]]));
 
     return Some(MainLayoutAreas {
       input: Some(input_text_area),
@@ -694,14 +689,13 @@ fn main_layout_areas(app: &App) -> Option<MainLayoutAreas> {
     });
   };
 
-  let [user_area, content_area] =
-    routes_area.layout(&Layout::horizontal([sidebar[0].clone(), sidebar[1].clone()]));
+  let [user_area, content_area] = routes_area.layout(&Layout::horizontal([sidebar[0], sidebar[1]]));
 
   if wide_layout {
     let [input_area, library_area, playlist_area] = user_area.layout(&Layout::vertical([
       Constraint::Length(3),
-      library[0].clone(),
-      library[1].clone(),
+      library[0],
+      library[1],
     ]));
     let [input_text_area, help_area, settings_area] =
       split_input_help_and_settings(app, input_area);
@@ -715,7 +709,7 @@ fn main_layout_areas(app: &App) -> Option<MainLayoutAreas> {
     })
   } else {
     let [library_area, playlist_area] =
-      user_area.layout(&Layout::vertical([library[0].clone(), library[1].clone()]));
+      user_area.layout(&Layout::vertical([library[0], library[1]]));
     Some(MainLayoutAreas {
       input: None,
       help: None,
