@@ -2156,6 +2156,7 @@ async fn handle_macos_media_events(
   };
 
   while let Some(event) = event_rx.recv().await {
+    info!("Received macOS media event: {:?}", event);
     match event {
       MacMediaEvent::PlayPause => {
         // Toggle based on atomic state (lock-free, always up-to-date)

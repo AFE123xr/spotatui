@@ -2,6 +2,7 @@ use super::common_key_events;
 use crate::core::app::{AlbumTableContext, App, RecommendationsContext};
 use crate::infra::network::IoEvent;
 use crate::tui::event::Key;
+use log::info;
 use rspotify::{
   model::{PlayContextId, PlayableId},
   prelude::*,
@@ -176,8 +177,10 @@ fn handle_low_event(app: &mut App) {
 }
 
 fn handle_recommended_tracks(app: &mut App) {
+  info!("Handling recommended tracks event for album tracks");
   match app.album_table_context {
     AlbumTableContext::Full => {
+      info!("AlbumTableContext is Full. Fetching selected track for recommendations.");
       if let Some(albums) = &app.library.clone().saved_albums.get_results(None) {
         if let Some(selected_album) = albums.items.get(app.album_list_index) {
           if let Some(track) = &selected_album
@@ -196,6 +199,7 @@ fn handle_recommended_tracks(app: &mut App) {
       }
     }
     AlbumTableContext::Simplified => {
+      info!("AlbumTableContext is Simplified. Fetching selected track for recommendations.");
       if let Some(selected_album_simplified) = &app.selected_album_simplified.clone() {
         if let Some(track) = &selected_album_simplified
           .tracks
