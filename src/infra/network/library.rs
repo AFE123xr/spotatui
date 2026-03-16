@@ -613,16 +613,17 @@ impl LibraryNetwork for Network {
 
           if app.is_current_route_playlist_track_table_for(&playlist_id) {
             let playlist_offset = app.playlist_offset;
-            app.dispatch(IoEvent::GetPlaylistItems(playlist_id.clone(), playlist_offset));
+            app.dispatch(IoEvent::GetPlaylistItems(
+              playlist_id.clone(),
+              playlist_offset,
+            ));
           }
 
           playlist_name
             .map(|name| format!("Added to {}", name))
             .unwrap_or_else(|| "Added to playlist".to_string())
         };
-        self
-          .show_status_message(status_message, 3)
-          .await;
+        self.show_status_message(status_message, 3).await;
       }
       Err(e) => self.handle_error(anyhow!(e)).await,
     }

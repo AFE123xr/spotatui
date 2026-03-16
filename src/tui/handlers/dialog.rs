@@ -233,18 +233,8 @@ mod tests {
       total: 3,
     });
     app.all_playlists = vec![
-      simplified_playlist(
-        "37i9dQZF1DWZqd5JICZI0u",
-        "Followed",
-        "friend-owner",
-        false,
-      ),
-      simplified_playlist(
-        "37i9dQZF1DXcBWIGoYBM5M",
-        "Owned",
-        "spotatui-owner",
-        false,
-      ),
+      simplified_playlist("37i9dQZF1DWZqd5JICZI0u", "Followed", "friend-owner", false),
+      simplified_playlist("37i9dQZF1DXcBWIGoYBM5M", "Owned", "spotatui-owner", false),
       simplified_playlist(
         "37i9dQZF1DX4WYpdgoIcn6",
         "Collaborative",
@@ -253,7 +243,9 @@ mod tests {
       ),
     ];
     app.pending_playlist_track_add = Some(PendingPlaylistTrackAdd {
-      track_id: TrackId::from_id("0000000000000000000001").unwrap().into_static(),
+      track_id: TrackId::from_id("0000000000000000000001")
+        .unwrap()
+        .into_static(),
       track_name: "Track".to_string(),
     });
     app.push_navigation_stack(

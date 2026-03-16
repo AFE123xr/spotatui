@@ -685,7 +685,8 @@ mod tests {
     handler(Key::Char('w'), &mut app);
 
     assert_eq!(
-      app.pending_playlist_track_add
+      app
+        .pending_playlist_track_add
         .as_ref()
         .map(|pending| pending.track_name.as_str()),
       Some("Search Track")

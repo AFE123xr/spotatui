@@ -3958,24 +3958,14 @@ mod tests {
     let mut app = App::new(tx, UserConfig::new(), SystemTime::now());
     app.user = Some(private_user("spotatui-owner"));
     app.all_playlists = vec![
-      simplified_playlist(
-        "37i9dQZF1DXcBWIGoYBM5M",
-        "Owned",
-        "spotatui-owner",
-        false,
-      ),
+      simplified_playlist("37i9dQZF1DXcBWIGoYBM5M", "Owned", "spotatui-owner", false),
       simplified_playlist(
         "37i9dQZF1DX4WYpdgoIcn6",
         "Collaborative",
         "friend-owner",
         true,
       ),
-      simplified_playlist(
-        "37i9dQZF1DWZqd5JICZI0u",
-        "Followed",
-        "friend-owner",
-        false,
-      ),
+      simplified_playlist("37i9dQZF1DWZqd5JICZI0u", "Followed", "friend-owner", false),
     ];
 
     let editable_names = app
@@ -4009,7 +3999,11 @@ mod tests {
     )];
 
     app.begin_add_track_to_playlist_flow(
-      Some(TrackId::from_id("0000000000000000000001").unwrap().into_static()),
+      Some(
+        TrackId::from_id("0000000000000000000001")
+          .unwrap()
+          .into_static(),
+      ),
       "Track".to_string(),
     );
 
