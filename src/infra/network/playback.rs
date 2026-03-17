@@ -70,14 +70,11 @@ fn trim_api_playback_uris(
 }
 
 fn api_playback_offset(
-  has_context: bool,
-  uris: Option<&[PlayableId<'static>]>,
+  context_uris: Option<&[PlayableId<'static>]>,
   offset: Option<usize>,
 ) -> Option<Offset> {
-  if has_context {
-    if let Some(first_uri) = uris.and_then(|track_uris| track_uris.first()) {
-      return Some(Offset::Uri(first_uri.uri()));
-    }
+  if let Some(first_uri) = context_uris.and_then(|uris| uris.first()) {
+    return Some(Offset::Uri(first_uri.uri()));
   }
 
   offset.map(|index| Offset::Position(ChronoDuration::milliseconds(index as i64)))
@@ -482,7 +479,7 @@ impl PlaybackNetwork for Network {
 
     let result = match (context_id, uris) {
       (Some(context), track_uris) => {
-        let offset_struct = api_playback_offset(true, track_uris.as_deref(), offset);
+        let offset_struct = api_playback_offset(track_uris.as_deref(), offset);
         self
           .spotify
           .start_context_playback(
@@ -494,7 +491,7 @@ impl PlaybackNetwork for Network {
           .await
       }
       (None, Some(track_uris)) => {
-        let offset_struct = api_playback_offset(false, None, offset);
+        let offset_struct = api_playback_offset(None, offset);
         self
           .spotify
           .start_uris_playback(
@@ -957,7 +954,7 @@ mod tests {
       playable_track("0000000000000000000002"),
     ];
 
-    let offset = api_playback_offset(true, Some(&uris), Some(1));
+    let offset = api_playback_offset(Some(&uris), Some(1));
 
     assert_eq!(
       offset,
@@ -969,12 +966,7 @@ mod tests {
 
   #[test]
   fn api_playback_offset_uses_position_for_uri_list_playback() {
-    let uris = vec![
-      playable_track("0000000000000000000001"),
-      playable_track("0000000000000000000002"),
-    ];
-
-    let offset = api_playback_offset(false, Some(&uris), Some(1));
+    let offset = api_playback_offset(None, Some(1));
 
     assert_eq!(
       offset,
@@ -984,7 +976,7 @@ mod tests {
 
   #[test]
   fn api_playback_offset_falls_back_to_position_when_context_has_no_uri() {
-    let offset = api_playback_offset(true, None, Some(3));
+    let offset = api_playback_offset(None, Some(3));
 
     assert_eq!(
       offset,
