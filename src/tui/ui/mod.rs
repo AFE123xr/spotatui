@@ -137,6 +137,6 @@ pub fn draw_routes(f: &mut Frame<'_>, app: &App, layout_chunk: Rect) {
     | RouteId::HelpMenu
     | RouteId::Queue
     | RouteId::Party => {} // These are drawn outside the main routed content area.
-    RouteId::Dialog => {}  // This is handled in draw_dialog.
+    RouteId::Dialog => {} // This is handled in draw_dialog.
   };
 }
