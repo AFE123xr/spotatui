@@ -87,6 +87,7 @@ impl CliApp {
           "https://open.spotify.com/episode/{}",
           episode.id.id()
         )),
+        _ => Err(anyhow!("unknown playable item type")),
       }
     } else {
       Err(anyhow!(
@@ -115,6 +116,7 @@ impl CliApp {
           "https://open.spotify.com/show/{}",
           episode.show.id.id()
         )),
+        _ => Err(anyhow!("unknown playable item type")),
       }
     } else {
       Err(anyhow!(
@@ -314,6 +316,7 @@ impl CliApp {
         let duration = match item {
           PlayableItem::Track(track) => track.duration.num_milliseconds() as u32,
           PlayableItem::Episode(episode) => episode.duration.num_milliseconds() as u32,
+          _ => return Err(anyhow!("unknown playable item type")),
         };
 
         (ms.num_milliseconds() as u32, duration)
@@ -368,6 +371,7 @@ impl CliApp {
           Some(i) => match i {
             PlayableItem::Track(t) => t.id.ok_or_else(|| anyhow!("item has no id")),
             PlayableItem::Episode(_) => Err(anyhow!("saving episodes not yet implemented")),
+            _ => Err(anyhow!("unknown playable item type")),
           },
           None => Err(anyhow!("no item playing")),
         }?;
@@ -469,6 +473,7 @@ impl CliApp {
         )));
         hs
       }
+      _ => return Err(anyhow!("unknown playable item type")),
     };
 
     hs.push(Format::Device(context.device.name));
@@ -487,7 +492,7 @@ impl CliApp {
         if let Ok(playlist_id) = rspotify::model::idtypes::PlaylistId::from_id(id_str) {
           match self.net.spotify.playlist(playlist_id, None, None).await {
             Ok(p) => {
-              let num = p.tracks.total;
+              let num = p.items.total;
               Some(thread_rng().gen_range(0..num) as usize)
             }
             Err(e) => {

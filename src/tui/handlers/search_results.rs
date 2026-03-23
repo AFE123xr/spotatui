@@ -573,6 +573,7 @@ mod tests {
   };
   use std::{collections::HashMap, sync::mpsc::channel, time::SystemTime};
 
+  #[allow(deprecated)]
   fn full_track(id: &str, name: &str) -> FullTrack {
     FullTrack {
       album: SimplifiedAlbum {
@@ -599,6 +600,7 @@ mod tests {
       popularity: 50,
       preview_url: None,
       track_number: 1,
+      r#type: rspotify::model::Type::Track,
     }
   }
 

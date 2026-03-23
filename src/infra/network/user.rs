@@ -120,6 +120,7 @@ impl UserNetwork for Network {
 
     // 2. Get top tracks for each artist
     for artist in artists {
+      #[allow(deprecated)]
       if let Ok(tracks) = self.spotify.artist_top_tracks(artist.id, None).await {
         all_tracks.extend(tracks);
       }

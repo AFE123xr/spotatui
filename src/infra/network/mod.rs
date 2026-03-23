@@ -568,7 +568,7 @@ impl Network {
               t.id.as_ref().map(|id| id.uri()).unwrap_or_default()
             }
             Some(rspotify::model::PlayableItem::Episode(e)) => e.id.uri(),
-            None => return,
+            Some(_) | None => return,
           };
           (uri, ctx.is_playing)
         }
@@ -746,7 +746,7 @@ impl Network {
             t.id.as_ref().map(|id| id.uri()).unwrap_or_default()
           }
           Some(rspotify::model::PlayableItem::Episode(e)) => e.id.uri(),
-          None => String::new(),
+          Some(_) | None => String::new(),
         },
         None => String::new(),
       };

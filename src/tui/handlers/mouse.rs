@@ -882,6 +882,7 @@ mod tests {
     app.push_navigation_stack(RouteId::Settings, ActiveBlock::Settings);
   }
 
+  #[allow(deprecated)]
   fn with_playbar_context(app: &mut App) {
     let item = PlayableItem::Track(FullTrack {
       album: SimplifiedAlbum {
@@ -908,6 +909,7 @@ mod tests {
       popularity: 50,
       preview_url: None,
       track_number: 1,
+      r#type: rspotify::model::Type::Track,
     });
 
     app.current_playback_context = Some(CurrentPlaybackContext {

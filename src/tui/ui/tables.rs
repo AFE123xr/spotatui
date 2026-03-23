@@ -125,12 +125,13 @@ pub fn draw_podcast_table(f: &mut Frame<'_>, app: &App, layout_chunk: Rect) {
     let items = saved_shows
       .items
       .iter()
-      .map(|show_page| TableItem {
-        id: show_page.show.id.id().to_string(),
-        format: vec![
-          show_page.show.name.to_owned(),
-          show_page.show.publisher.to_owned(),
-        ],
+      .map(|show_page| {
+        #[allow(deprecated)]
+        let publisher = show_page.show.publisher.to_owned();
+        TableItem {
+          id: show_page.show.id.id().to_string(),
+          format: vec![show_page.show.name.to_owned(), publisher],
+        }
       })
       .collect::<Vec<TableItem>>();
 
@@ -546,6 +547,7 @@ pub fn draw_show_episodes(f: &mut Frame<'_>, app: &App, layout_chunk: Rect) {
       })
       .collect::<Vec<TableItem>>();
 
+    #[allow(deprecated)]
     let title = match &app.episode_table_context {
       EpisodeTableContext::Simplified => match &app.selected_show_simplified {
         Some(selected_show) => {
@@ -677,6 +679,7 @@ fn draw_table(
         let episode_id_str = episode.id.id().to_string();
         items.iter().position(|item| episode_id_str == item.id)
       }
+      _ => None,
     })
   });
 

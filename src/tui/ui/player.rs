@@ -391,6 +391,7 @@ fn extract_track_info(app: &App) -> (Option<String>, Option<String>) {
       let (name, artists) = match track_item {
         PlayableItem::Track(track) => (track.name.clone(), create_artist_string(&track.artists)),
         PlayableItem::Episode(episode) => (episode.name.clone(), episode.show.name.clone()),
+        _ => return (None, None),
       };
       return (Some(name), Some(artists));
     }
@@ -587,6 +588,7 @@ pub fn draw_playbar(f: &mut Frame<'_>, app: &App, layout_chunk: Rect) {
           episode.name.to_owned(),
           episode.duration,
         ),
+        _ => return,
       };
 
       // Use native track info for instant display when available (e.g., after skipping tracks)
@@ -602,6 +604,7 @@ pub fn draw_playbar(f: &mut Frame<'_>, app: &App, layout_chunk: Rect) {
           let artists_str = match track_item {
             PlayableItem::Track(track) => create_artist_string(&track.artists),
             PlayableItem::Episode(episode) => format!("{} - {}", episode.name, episode.show.name),
+            _ => return,
           };
           (
             name.clone(),

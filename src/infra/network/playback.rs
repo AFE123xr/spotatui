@@ -226,6 +226,7 @@ impl PlaybackNetwork for Network {
               };
             }
             PlayableItem::Episode(_episode) => { /*should map this to following the podcast show*/ }
+            _ => {}
           }
         };
 
@@ -266,6 +267,7 @@ impl PlaybackNetwork for Network {
             let image = match playable {
               PlayableItem::Track(t) => t.album.images.first(),
               PlayableItem::Episode(e) => e.images.first(),
+              _ => None,
             };
 
             if let Some(image) = image {
@@ -296,6 +298,7 @@ impl PlaybackNetwork for Network {
               let api_track_name = match item {
                 PlayableItem::Track(t) => &t.name,
                 PlayableItem::Episode(e) => &e.name,
+                _ => return,
               };
               // Only clear if names match (API caught up to native player)
               if api_track_name == &native_info.name {
@@ -871,6 +874,7 @@ impl PlaybackNetwork for Network {
           let current_id = match item {
             PlayableItem::Track(t) => t.id.map(|id| id.id().to_string()),
             PlayableItem::Episode(e) => Some(e.id.id().to_string()),
+            _ => None,
           };
 
           if current_id == Some(previous_track_id)

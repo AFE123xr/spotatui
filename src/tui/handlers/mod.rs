@@ -415,6 +415,7 @@ fn handle_jump_to_album(app: &mut App) {
       PlayableItem::Episode(episode) => {
         app.dispatch(IoEvent::GetShowEpisodes(Box::new(episode.show)));
       }
+      _ => {}
     };
   }
 }
@@ -436,6 +437,7 @@ fn handle_jump_to_artist_album(app: &mut App) {
       PlayableItem::Episode(_episode) => {
         // Do nothing for episode (yet!)
       }
+      _ => {}
     }
   };
 }
