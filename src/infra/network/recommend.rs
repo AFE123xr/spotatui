@@ -65,10 +65,9 @@ impl RecommendationNetwork for Network {
 
         let mut full_tracks = Vec::new();
         if !track_ids.is_empty() {
-          // Chunk it if needed (50 limit)
-          for chunk in track_ids.chunks(50) {
-            if let Ok(tracks) = self.spotify.tracks(chunk.iter().cloned(), None).await {
-              full_tracks.extend(tracks);
+          for id in &track_ids {
+            if let Ok(track) = self.spotify.track(id.clone(), None).await {
+              full_tracks.push(track);
             }
           }
         }

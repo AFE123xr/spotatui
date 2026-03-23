@@ -51,6 +51,7 @@ pub(crate) fn toggle_like_currently_playing_item(app: &mut App) {
           episode.id.into_static(),
         )));
       }
+      _ => {}
     };
   };
 }
@@ -68,6 +69,7 @@ pub(crate) fn add_currently_playing_track_to_playlist(app: &mut App) {
       PlayableItem::Episode(_) => {
         app.set_status_message("Only tracks can be added to playlists".to_string(), 4);
       }
+      _ => {}
     };
   } else {
     app.set_status_message("No track currently playing".to_string(), 4);

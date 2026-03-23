@@ -8,6 +8,7 @@ use rspotify::model::{
 };
 use std::collections::HashMap;
 
+#[allow(deprecated)]
 pub fn private_user(id: &str) -> PrivateUser {
   PrivateUser {
     country: None,
@@ -23,6 +24,7 @@ pub fn private_user(id: &str) -> PrivateUser {
   }
 }
 
+#[allow(deprecated)]
 pub fn public_user(id: &str, display_name: &str) -> PublicUser {
   PublicUser {
     display_name: Some(display_name.to_string()),
@@ -34,12 +36,17 @@ pub fn public_user(id: &str, display_name: &str) -> PublicUser {
   }
 }
 
+#[allow(deprecated)]
 pub fn simplified_playlist(
   id: &str,
   name: &str,
   owner_id: &str,
   collaborative: bool,
 ) -> SimplifiedPlaylist {
+  let tracks = PlaylistTracksRef {
+    href: format!("https://api.spotify.com/v1/playlists/{id}/tracks"),
+    total: 5,
+  };
   SimplifiedPlaylist {
     collaborative,
     external_urls: HashMap::new(),
@@ -50,9 +57,7 @@ pub fn simplified_playlist(
     owner: public_user(owner_id, owner_id),
     public: Some(false),
     snapshot_id: "snapshot".to_string(),
-    tracks: PlaylistTracksRef {
-      href: format!("https://api.spotify.com/v1/playlists/{id}/tracks"),
-      total: 5,
-    },
+    tracks: tracks.clone(),
+    items: tracks,
   }
 }

@@ -10,7 +10,7 @@ use rspotify::model::{
   album::SimplifiedAlbum,
   artist::FullArtist,
   enums::Country,
-  idtypes::{AlbumId, ArtistId, ShowId, TrackId},
+  idtypes::{AlbumId, ArtistId, LibraryId, ShowId, TrackId},
   page::Page,
   show::SimplifiedShow,
   Market,
@@ -48,8 +48,8 @@ impl MetadataNetwork for Network {
   ) {
     let artist_id_str = artist_id.id().to_string();
     let market = country.map(Market::Country);
+    #[allow(deprecated)]
     let top_tracks_req = self.spotify.artist_top_tracks(artist_id.clone(), market);
-    // rspotify 0.14 artist_related_artists is not deprecated or we suppress
     #[allow(deprecated)]
     let related_artists_req = self.spotify.artist_related_artists(artist_id.clone());
     let albums_req = self.spotify.artist_albums(artist_id.clone(), None, market);
@@ -244,7 +244,11 @@ impl MetadataNetwork for Network {
   }
 
   async fn user_unfollow_artists(&mut self, artist_ids: Vec<ArtistId<'static>>) {
-    match self.spotify.user_unfollow_artists(artist_ids).await {
+    match self
+      .spotify
+      .library_remove(artist_ids.into_iter().map(LibraryId::Artist))
+      .await
+    {
       Ok(_) => {
         // Handled
       }
@@ -253,7 +257,11 @@ impl MetadataNetwork for Network {
   }
 
   async fn user_follow_artists(&mut self, artist_ids: Vec<ArtistId<'static>>) {
-    match self.spotify.user_follow_artists(artist_ids).await {
+    match self
+      .spotify
+      .library_add(artist_ids.into_iter().map(LibraryId::Artist))
+      .await
+    {
       Ok(_) => {
         // Handled
       }
@@ -264,7 +272,7 @@ impl MetadataNetwork for Network {
   async fn user_artist_check_follow(&mut self, artist_ids: Vec<ArtistId<'static>>) {
     match self
       .spotify
-      .user_artist_check_follow(artist_ids.clone())
+      .library_contains(artist_ids.iter().map(|id| LibraryId::Artist(id.as_ref())))
       .await
     {
       Ok(is_following) => {

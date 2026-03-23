@@ -159,6 +159,7 @@ pub fn draw_search_results(f: &mut Frame<'_>, app: &App, layout_chunk: Rect) {
         context.item.and_then(|item| match item {
           PlayableItem::Track(track) => track.id.map(|id| id.id().to_string()),
           PlayableItem::Episode(episode) => Some(episode.id.id().to_string()),
+          _ => None,
         })
       })
       .unwrap_or_default();
@@ -323,7 +324,9 @@ pub fn draw_search_results(f: &mut Frame<'_>, app: &App, layout_chunk: Rect) {
             if app.saved_show_ids_set.contains(item.id.id()) {
               show_name.push_str(&app.user_config.padded_liked_icon());
             }
-            show_name.push_str(&format!("{:} - {}", item.name, item.publisher));
+            #[allow(deprecated)]
+            let publisher = &item.publisher;
+            show_name.push_str(&format!("{:} - {}", item.name, publisher));
             show_name
           })
           .collect(),

@@ -23,6 +23,7 @@ use rspotify::{
   },
   prelude::*, // Adds Id trait for .id() method
 };
+use serde::de::DeserializeOwned;
 use std::cell::Cell;
 use std::sync::mpsc::Sender;
 #[cfg(any(feature = "streaming", all(feature = "mpris", target_os = "linux")))]
@@ -91,7 +92,7 @@ impl<T> ScrollableResultPages<T> {
 
 // Offset-keyed page caches are always kept sorted by page.offset, but the cache can be sparse.
 // Visible-page identity must be derived from page.offset, not raw cache index adjacency.
-impl<T> ScrollableResultPages<Page<T>> {
+impl<T: DeserializeOwned> ScrollableResultPages<Page<T>> {
   pub fn page_index_for_offset(&self, offset: u32) -> Option<usize> {
     self
       .pages
@@ -1270,6 +1271,7 @@ impl App {
       let duration_ms = match item {
         PlayableItem::Track(track) => track.duration.num_milliseconds() as u32,
         PlayableItem::Episode(episode) => episode.duration.num_milliseconds() as u32,
+        _ => return,
       };
 
       let event = if seek_ms < duration_ms {
@@ -1380,6 +1382,7 @@ impl App {
         let duration_ms = match item {
           PlayableItem::Track(track) => track.duration.num_milliseconds() as u128,
           PlayableItem::Episode(episode) => episode.duration.num_milliseconds() as u128,
+          _ => return,
         };
 
         self.song_progress_ms = (self.song_progress_ms + tick_rate_ms).min(duration_ms);
@@ -1400,6 +1403,7 @@ impl App {
       let duration_ms = match item {
         PlayableItem::Track(track) => track.duration.num_milliseconds() as u32,
         PlayableItem::Episode(episode) => episode.duration.num_milliseconds() as u32,
+        _ => return,
       };
 
       let old_progress = match self.seek_ms {
@@ -1955,6 +1959,7 @@ impl App {
             self.handle_error(anyhow!("failed to set clipboard content: {}", e));
           }
         }
+        _ => {}
       }
     }
   }
@@ -1991,6 +1996,7 @@ impl App {
             self.handle_error(anyhow!("failed to set clipboard content: {}", e));
           }
         }
+        _ => {}
       }
     }
   }
@@ -2012,7 +2018,7 @@ impl App {
     let mut positions: Vec<usize> = Vec::new();
 
     for (idx, item) in playlist_track_page.items.iter().enumerate() {
-      if let Some(PlayableItem::Track(full_track)) = item.track.as_ref() {
+      if let Some(PlayableItem::Track(full_track)) = item.item.as_ref() {
         tracks.push(full_track.clone());
         if let Some(track_id) = full_track.id.as_ref() {
           track_ids.push(track_id.clone().into_static());
@@ -2747,6 +2753,7 @@ impl App {
     ));
   }
 
+  #[allow(deprecated)]
   pub fn get_user_country(&self) -> Option<Country> {
     self.user.as_ref().and_then(|user| user.country)
   }
@@ -3543,6 +3550,7 @@ mod tests {
   use std::collections::HashMap;
   use std::sync::mpsc::channel;
 
+  #[allow(deprecated)]
   fn full_track(id: &str, name: &str) -> FullTrack {
     FullTrack {
       album: SimplifiedAlbum {
@@ -3569,6 +3577,7 @@ mod tests {
       popularity: 50,
       preview_url: None,
       track_number: 1,
+      r#type: rspotify::model::Type::Track,
     }
   }
 

@@ -221,6 +221,7 @@ fn build_discord_playback(app: &App) -> Option<discord_rpc::DiscordPlayback> {
         },
         is_playing,
       ),
+      _ => return None,
     }
   } else {
     return None;
@@ -266,6 +267,7 @@ fn get_mpris_metadata(app: &App) -> Option<MprisMetadataTuple> {
       .and_then(|item| match item {
         PlayableItem::Track(t) => t.album.images.first().map(|i| i.url.clone()),
         PlayableItem::Episode(e) => e.images.first().map(|i| i.url.clone()),
+        _ => None,
       });
     return Some((
       native_info.name.clone(),
@@ -293,6 +295,7 @@ fn get_mpris_metadata(app: &App) -> Option<MprisMetadataTuple> {
         episode.duration.num_milliseconds() as u32,
         episode.images.first().map(|image| image.url.clone()),
       )),
+      _ => None,
     }
   } else {
     None
@@ -321,6 +324,7 @@ fn get_macos_metadata(app: &App) -> Option<MacosMetadataTuple> {
         episode.duration.num_milliseconds() as u32,
         episode.images.first().map(|image| image.url.clone()),
       )),
+      _ => None,
     }
   } else {
     None
@@ -647,6 +651,7 @@ async fn account_supports_native_streaming(
   spotify: &AuthCodePkceSpotify,
 ) -> (bool, Option<&'static str>) {
   match spotify.me().await {
+    #[allow(deprecated)]
     Ok(user) => match user.product {
       Some(rspotify::model::SubscriptionLevel::Premium) => (true, None),
       Some(level) => {

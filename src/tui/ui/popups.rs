@@ -89,6 +89,7 @@ fn queue_item_line(item: &PlayableItem) -> String {
     PlayableItem::Episode(episode) => {
       format!("{} - {}", episode.name, episode.show.name)
     }
+    _ => String::from("Unknown item"),
   }
 }
 

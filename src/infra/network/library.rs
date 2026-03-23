@@ -7,7 +7,7 @@ use crate::core::app::{
 use anyhow::anyhow;
 use reqwest::Method;
 use rspotify::model::{
-  idtypes::{AlbumId, PlaylistId, ShowId, TrackId, UserId},
+  idtypes::{AlbumId, LibraryId, PlaylistId, ShowId, TrackId, UserId},
   page::Page,
   playlist::PlaylistItem,
   track::SavedTrack,
@@ -570,11 +570,11 @@ impl LibraryNetwork for Network {
     &mut self,
     _playlist_owner_id: UserId<'static>,
     playlist_id: PlaylistId<'static>,
-    is_public: Option<bool>,
+    _is_public: Option<bool>,
   ) {
     match self
       .spotify
-      .playlist_follow(playlist_id, Some(is_public.unwrap_or(false)))
+      .library_add([LibraryId::Playlist(playlist_id)])
       .await
     {
       Ok(_) => {
@@ -589,7 +589,11 @@ impl LibraryNetwork for Network {
     _user_id: UserId<'static>,
     playlist_id: PlaylistId<'static>,
   ) {
-    match self.spotify.playlist_unfollow(playlist_id).await {
+    match self
+      .spotify
+      .library_remove([LibraryId::Playlist(playlist_id)])
+      .await
+    {
       Ok(_) => {
         // Handled
       }
@@ -737,7 +741,7 @@ impl LibraryNetwork for Network {
           }
 
           for item in page.items {
-            if let Some(PlayableItem::Track(full_track)) = item.track {
+            if let Some(PlayableItem::Track(full_track)) = item.item {
               all_tracks.push(full_track);
             }
           }
@@ -771,6 +775,7 @@ mod tests {
   use rspotify::model::{artist::SimplifiedArtist, track::FullTrack};
   use std::collections::{HashMap, HashSet};
 
+  #[allow(deprecated)]
   fn full_track(id: &str) -> FullTrack {
     FullTrack {
       album: rspotify::model::album::SimplifiedAlbum {
@@ -797,6 +802,7 @@ mod tests {
       popularity: 50,
       preview_url: None,
       track_number: 1,
+      r#type: rspotify::model::Type::Track,
     }
   }
 

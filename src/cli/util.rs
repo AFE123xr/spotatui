@@ -218,17 +218,17 @@ impl Format {
       }
       FormatType::Show(r) => {
         let uri = r.id.uri();
-        vec![
-          Self::Artist(r.publisher),
-          Self::Show(r.name),
-          Self::Uri(uri),
-        ]
+        #[allow(deprecated)]
+        let publisher = r.publisher;
+        vec![Self::Artist(publisher), Self::Show(r.name), Self::Uri(uri)]
       }
       FormatType::Episode(e) => {
         let uri = e.id.uri();
+        #[allow(deprecated)]
+        let publisher = e.show.publisher.clone();
         vec![
           Self::Show(e.show.name),
-          Self::Artist(e.show.publisher),
+          Self::Artist(publisher),
           Self::Track(e.name),
           Self::Uri(uri),
         ]

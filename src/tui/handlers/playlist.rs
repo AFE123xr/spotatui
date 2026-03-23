@@ -103,7 +103,12 @@ mod tests {
   use std::sync::mpsc::channel;
   use std::time::SystemTime;
 
+  #[allow(deprecated)]
   fn test_playlist(id: &str, name: &str) -> SimplifiedPlaylist {
+    let tracks = PlaylistTracksRef {
+      href: "https://example.com/playlist/tracks".to_string(),
+      total: 2,
+    };
     SimplifiedPlaylist {
       collaborative: false,
       external_urls: HashMap::new(),
@@ -121,10 +126,8 @@ mod tests {
       },
       public: Some(false),
       snapshot_id: "snapshot".to_string(),
-      tracks: PlaylistTracksRef {
-        href: "https://example.com/playlist/tracks".to_string(),
-        total: 2,
-      },
+      tracks: tracks.clone(),
+      items: tracks,
     }
   }
 
