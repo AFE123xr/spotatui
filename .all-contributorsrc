@@ -213,6 +213,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "1knth",
+      "name": "knth",
+      "avatar_url": "https://avatars.githubusercontent.com/u/115324660?v=4",
+      "profile": "https://github.com/1knth",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
