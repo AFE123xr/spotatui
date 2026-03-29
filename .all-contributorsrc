@@ -222,6 +222,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "SkyeVault",
+      "name": "Lorelei Noble",
+      "avatar_url": "https://avatars.githubusercontent.com/u/64027767?v=4",
+      "profile": "http://www.dev.arynwood.com",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
