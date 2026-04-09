@@ -248,6 +248,7 @@ fn draw_playbar_controls(f: &mut Frame<'_>, app: &App, playbar_area: Rect) {
   }
 }
 
+#[cfg(feature = "cover-art")]
 fn center_rect_within(bounds: Rect, size: Rect) -> Rect {
   Rect {
     x: bounds.x + bounds.width.saturating_sub(size.width.min(bounds.width)) / 2,
@@ -823,6 +824,7 @@ mod tests {
     );
   }
 
+  #[cfg(feature = "cover-art")]
   #[test]
   fn center_rect_within_centers_smaller_rect() {
     let bounds = Rect::new(10, 20, 100, 50);
