@@ -340,6 +340,11 @@ pub fn get_help_docs(app: &App) -> Vec<Vec<String>> {
       String::from("General"),
     ],
     vec![
+      String::from("Toggle saved state for currently playing track/episode"),
+      key_bindings.like_track.to_string(),
+      String::from("General"),
+    ],
+    vec![
       String::from("Open sort menu"),
       String::from(","),
       String::from("Track/Album/Artist list"),

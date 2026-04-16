@@ -3185,6 +3185,13 @@ impl App {
           value: SettingValue::Key(key_to_string(&self.user_config.keys.show_queue)),
         },
         SettingItem {
+          id: "keys.like_track".to_string(),
+          name: "Like Track".to_string(),
+          description: "Toggle saved state for the currently playing track or episode"
+            .to_string(),
+          value: SettingValue::Key(key_to_string(&self.user_config.keys.like_track)),
+        },
+        SettingItem {
           id: "keys.copy_song_url".to_string(),
           name: "Copy Song URL".to_string(),
           description: "Copy current song URL to clipboard".to_string(),
@@ -3600,6 +3607,13 @@ impl App {
           if let SettingValue::Key(v) = &setting.value {
             if let Ok(key) = crate::core::user_config::parse_key_public(v.clone()) {
               self.user_config.keys.show_queue = key;
+            }
+          }
+        }
+        "keys.like_track" => {
+          if let SettingValue::Key(v) = &setting.value {
+            if let Ok(key) = crate::core::user_config::parse_key_public(v.clone()) {
+              self.user_config.keys.like_track = key;
             }
           }
         }
