@@ -590,6 +590,7 @@ pub struct KeyBindingsString {
   open_settings: Option<String>,
   save_settings: Option<String>,
   listening_party: Option<String>,
+  like_track: Option<String>,
 }
 
 #[derive(Clone)]
@@ -626,6 +627,7 @@ pub struct KeyBindings {
   pub open_settings: Key,
   pub save_settings: Key,
   pub listening_party: Key,
+  pub like_track: Key,
 }
 
 #[derive(Default, Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -778,6 +780,7 @@ impl UserConfig {
         },
         save_settings: Key::Alt('s'),
         listening_party: Key::Ctrl('p'),
+        like_track: Key::Char('F'),
       },
       behavior: BehaviorConfig {
         seek_milliseconds: 5 * 1000,
@@ -889,6 +892,7 @@ impl UserConfig {
     to_keys!(open_settings);
     to_keys!(save_settings);
     to_keys!(listening_party);
+    to_keys!(like_track);
 
     Ok(())
   }
@@ -1242,6 +1246,7 @@ impl UserConfig {
       open_settings: Some(key_to_config_string(self.keys.open_settings)),
       save_settings: Some(key_to_config_string(self.keys.save_settings)),
       listening_party: Some(key_to_config_string(self.keys.listening_party)),
+      like_track: Some(key_to_config_string(self.keys.like_track)),
     };
 
     // Helper to build theme config from current values

@@ -184,6 +184,13 @@ pub fn handle_app(key: Key, app: &mut App) {
     _ if key == app.user_config.keys.listening_party => {
       app.push_navigation_stack(RouteId::Party, ActiveBlock::Party);
     }
+    _ if key == app.user_config.keys.like_track => {
+      if is_input_mode(app) {
+        handle_block_events(key, app);
+      } else {
+        playbar::toggle_like_currently_playing_item(app);
+      }
+    }
     // Resize sidebar: { decreases, } increases width
     Key::Char('{') => {
       if is_input_mode(app) {
@@ -462,6 +469,47 @@ mod tests {
   use super::*;
   #[cfg(target_os = "macos")]
   use crate::core::app::TrackTableContext;
+  use crate::core::user_config::UserConfig;
+  use chrono::{Duration as ChronoDuration, Utc};
+  use rspotify::model::{
+    artist::SimplifiedArtist,
+    context::{Actions, CurrentPlaybackContext},
+    enums::{DeviceType, RepeatState},
+    idtypes::TrackId,
+    CurrentlyPlayingType, Device, FullTrack, PlayableId, PlayableItem, SimplifiedAlbum,
+  };
+  use std::{collections::HashMap, sync::mpsc::channel, time::SystemTime};
+
+  #[allow(deprecated)]
+  fn full_track(id: &str, name: &str) -> FullTrack {
+    FullTrack {
+      album: SimplifiedAlbum {
+        name: "Album".to_string(),
+        ..Default::default()
+      },
+      artists: vec![SimplifiedArtist {
+        name: "Artist".to_string(),
+        ..Default::default()
+      }],
+      available_markets: Vec::new(),
+      disc_number: 1,
+      duration: ChronoDuration::milliseconds(180_000),
+      explicit: false,
+      external_ids: HashMap::new(),
+      external_urls: HashMap::new(),
+      href: None,
+      id: Some(TrackId::from_id(id).unwrap().into_static()),
+      is_local: false,
+      is_playable: Some(true),
+      linked_from: None,
+      restrictions: None,
+      name: name.to_string(),
+      popularity: 50,
+      preview_url: None,
+      track_number: 1,
+      r#type: rspotify::model::Type::Track,
+    }
+  }
 
   #[test]
   fn global_shift_w_adds_current_track_from_anywhere() {
@@ -498,6 +546,57 @@ mod tests {
     // force_previous_track dispatches through App which requires no io_tx in tests,
     // so just confirm the route didn't change (it shouldn't navigate anywhere)
     assert_eq!(app.get_current_route().active_block, ActiveBlock::Empty);
+  }
+
+  #[test]
+  fn global_shift_f_likes_current_track_from_anywhere() {
+    let (tx, rx) = channel();
+    let mut app = App::new(tx, UserConfig::new(), SystemTime::now());
+    let track = full_track("0000000000000000000001", "Track 1");
+    let expected_track_id = track.id.clone().unwrap();
+
+    app.current_playback_context = Some(CurrentPlaybackContext {
+      device: Device {
+        id: Some("device-1".to_string()),
+        is_active: true,
+        is_private_session: false,
+        is_restricted: false,
+        name: "Desk Speaker".to_string(),
+        _type: DeviceType::Computer,
+        volume_percent: Some(42),
+      },
+      repeat_state: RepeatState::Off,
+      shuffle_state: false,
+      context: None,
+      timestamp: Utc::now(),
+      progress: None,
+      is_playing: false,
+      item: Some(PlayableItem::Track(track)),
+      currently_playing_type: CurrentlyPlayingType::Track,
+      actions: Actions::default(),
+    });
+    app.set_current_route_state(Some(ActiveBlock::Empty), Some(ActiveBlock::Library));
+
+    // Default like_track is Key::Char('F')
+    handle_app(Key::Char('F'), &mut app);
+
+    match rx.recv().unwrap() {
+      IoEvent::ToggleSaveTrack(PlayableId::Track(track_id)) => {
+        assert_eq!(track_id, expected_track_id);
+      }
+      _ => panic!("unexpected event"),
+    }
+  }
+
+  #[test]
+  fn global_shift_f_is_not_intercepted_in_input_mode() {
+    let mut app = App::default();
+    app.set_current_route_state(Some(ActiveBlock::Input), Some(ActiveBlock::Input));
+
+    handle_app(Key::Char('F'), &mut app);
+
+    // In input mode, 'F' should be added to the input buffer
+    assert_eq!(app.input, vec!['F']);
   }
 
   #[cfg(target_os = "macos")]

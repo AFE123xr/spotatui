@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Global like/unlike hotkey**: Added a configurable global keybinding (`F` by default) to like or unlike the currently playing track from any screen, complementing the existing context-specific `s` key.
+
 ### Changed
 
 - **Fullscreen playbar resizing**: `LyricsView` and `CoverArtView` now honor the existing playbar height setting, so the lower player can be resized or fully hidden with the same keybindings used on the main screen (fixes [#208](https://github.com/LargeModGames/spotatui/issues/208)).
